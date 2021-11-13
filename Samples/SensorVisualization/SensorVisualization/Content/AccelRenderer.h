@@ -16,6 +16,9 @@
 #include "ShaderStructures.h"
 #include "researchmode\ResearchModeApi.h"
 #include <Texture2D.h>
+#include <fstream>
+
+using namespace winrt::Windows::Storage;
 
 namespace BasicHologram
 {
@@ -28,6 +31,16 @@ namespace BasicHologram
             m_pAccelSensor = pAccelSensor;
             m_pAccelSensor->AddRef();
             m_pAccelUpdateThread = new std::thread(AccelUpdateThread, this, hasData, pCamAccessConsent);
+
+            StorageFolder localFolder = ApplicationData::Current().LocalFolder();
+            OutputDebugString(L"localFolder.Path().data(): ");
+            OutputDebugString(localFolder.Path().data());
+
+            wchar_t fileName[MAX_PATH] = {};
+            swprintf_s(fileName, L"%s\\imu_acc.txt", localFolder.Path().data());
+
+            of_acc = std::ofstream(fileName);
+            of_acc << "# VinylHupTicks, SocTicks, AccelValues_x, AccelValues_y, AccelValues_z, temperature" << std::endl;
         }
         virtual ~AccelRenderer()
         {
@@ -39,6 +52,8 @@ namespace BasicHologram
                 m_pAccelSensor->CloseStream();
                 m_pAccelSensor->Release();
             }
+
+            if (of_acc.is_open()) of_acc.close();
         }
         void Update(DX::StepTimer const& timer);
         void UpdateSample();
@@ -66,6 +81,8 @@ namespace BasicHologram
 
         std::thread *m_pAccelUpdateThread;
         bool m_fExit = { false };
+
+        std::ofstream of_acc;
     };
 
 }

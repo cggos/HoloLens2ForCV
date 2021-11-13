@@ -17,6 +17,10 @@
 #include "researchmode\ResearchModeApi.h"
 #include <Texture2D.h>
 
+#include <fstream>
+
+using namespace winrt::Windows::Storage;
+
 namespace BasicHologram
 {
     // This sample renderer instantiates a basic rendering pipeline.
@@ -28,6 +32,16 @@ namespace BasicHologram
             m_pGyroSensor = pAccelSensor;
             m_pGyroSensor->AddRef();
             m_pAccelUpdateThread = new std::thread(GyroUpdateThread, this, hasData, pCamAccessConsent);
+
+            StorageFolder localFolder = ApplicationData::Current().LocalFolder();
+            OutputDebugString(L"localFolder.Path().data(): ");
+            OutputDebugString(localFolder.Path().data());
+
+            wchar_t fileName[MAX_PATH] = {};
+            swprintf_s(fileName, L"%s\\imu_gyr.txt", localFolder.Path().data());
+
+            of_gyr = std::ofstream(fileName);
+            of_gyr << "# VinylHupTicks, SocTicks, GyroValues_x, GyroValues_y, GyroValues_z, temperature" << std::endl;
         }
         virtual ~GyroRenderer()
         {
@@ -39,6 +53,8 @@ namespace BasicHologram
                 m_pGyroSensor->CloseStream();
                 m_pGyroSensor->Release();
             }
+
+            if (of_gyr.is_open()) of_gyr.close();
         }
         void Update(DX::StepTimer const& timer);
         void UpdateSample();
@@ -66,6 +82,8 @@ namespace BasicHologram
 
         std::thread *m_pAccelUpdateThread;
         bool m_fExit = { false };
+
+        std::ofstream of_gyr;
     };
 
 }

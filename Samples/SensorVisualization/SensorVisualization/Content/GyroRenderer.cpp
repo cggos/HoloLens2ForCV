@@ -74,12 +74,15 @@ void GyroRenderer::GyroUpdateLoop()
 
                 hupTimeDeltas = hupTimeDeltas + printString;
 
+                of_gyr << pGyroBuffer[i].VinylHupTicks << "," << pGyroBuffer[i].SocTicks << ","
+                    << pGyroBuffer[i].GyroValues[0] << "," << pGyroBuffer[i].GyroValues[1] << "," << pGyroBuffer[i].GyroValues[2] << ","
+                    << pGyroBuffer[i].temperature << std::endl;
             }
             lastHupTick = pGyroBuffer[i].VinylHupTicks;
         }
 
         hupTimeDeltas = hupTimeDeltas + "\n";
-        //OutputDebugStringA(hupTimeDeltas.c_str());
+        OutputDebugStringA(hupTimeDeltas.c_str());
 
         pSensorFrame->GetTimeStamp(&timeStamp);
         LARGE_INTEGER qpcNow;

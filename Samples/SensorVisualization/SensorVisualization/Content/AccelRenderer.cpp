@@ -13,6 +13,7 @@
 #include "AccelRenderer.h"
 #include "Common\DirectXHelper.h"
 #include <mutex>
+#include <iostream>
 
 using namespace BasicHologram;
 using namespace DirectX;
@@ -74,12 +75,18 @@ void AccelRenderer::AccelUpdateLoop()
 
                 hupTimeDeltas = hupTimeDeltas + printString;
 
+                of_acc << pAccelBuffer[i].VinylHupTicks << "," << pAccelBuffer[i].SocTicks << ","
+                    << pAccelBuffer[i].AccelValues[0] << "," << pAccelBuffer[i].AccelValues[1] << "," << pAccelBuffer[i].AccelValues[2] << ","
+                    << pAccelBuffer[i].temperature << std::endl;
+
             }
             lastHupTick = pAccelBuffer[i].VinylHupTicks;
         }
 
         hupTimeDeltas = hupTimeDeltas + "\n";
-        //OutputDebugStringA(hupTimeDeltas.c_str());
+        OutputDebugStringA(hupTimeDeltas.c_str());
+
+        std::cout << "hupTimeDeltas: " << hupTimeDeltas << std::endl;
 
         pSensorFrame->GetTimeStamp(&timeStamp);
         LARGE_INTEGER qpcNow;
@@ -106,7 +113,7 @@ void AccelRenderer::AccelUpdateLoop()
                 sqrt(m_accelSample.x * m_accelSample.x + m_accelSample.y * m_accelSample.y + m_accelSample.z * m_accelSample.z),
                     (((timeStamp.HostTicks - lastSocTick) * 1000) / timeStamp.HostTicksPerSecond), // Milliseconds
                 timeInMilliseconds);
-            //OutputDebugStringA(printString);
+            OutputDebugStringA(printString);
         }
         lastSocTick = timeStamp.HostTicks;
         lastQpcNow = uqpcNow;
